@@ -9,10 +9,10 @@ func main() {
 
 	// Construct OpenAPI Search parameters
 
-	searchParameters := sentinel.OpenAPISearchParams{
-		PlatformName: sentinel.Sentinel2,
+	searchParameters := sentinel.SearchParameters{
+		Platforms: []sentinel.Platform{sentinel.PlanformSentinel2},
 	}
 
-	client.SearchOData(searchParameters)
+	client.Query(searchParameters)
 
 }

@@ -1,14 +1,14 @@
 package sentinel
 
-type platformNameType string
+type Platform string
 
 const (
-	Sentinel1          platformNameType = "Sentinel-1"
-	Sentinel2          platformNameType = "Sentinel-2"
-	Sentinel3          platformNameType = "Sentinel-3"
-	Sentinel5Precursor platformNameType = "Sentinel-5 Precursor"
+	PlanformSentinel1          Platform = "Sentinel-1"
+	PlanformSentinel2          Platform = "Sentinel-2"
+	PlanformSentinel3          Platform = "Sentinel-3"
+	PlanformSentinel5Precursor Platform = "Sentinel-5 Precursor"
 )
 
-type OpenAPISearchParams struct {
-	PlatformName platformNameType
+type SearchParameters struct {
+	Platforms []Platform
 }
