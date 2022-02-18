@@ -286,24 +286,3 @@ func (gc *GoogleCloudClient) downloadFile(bucket, object string, destFileName st
 	return nil
 
 }
-
-// https://storage.googleapis.com/gcp-public-data-sentinel-2/L2/tiles/16/M/BD/S2A_MSIL2A_20181220T162311_N0211_R097_T16MBD_20181220T195456.SAFE/GRANULE/L2A_T16MBD_A018255_20181220T162306/IMG_DATA/R10m/T16MBD_20181220T162311_AOT_10m.jp2
-// gs://gcp-public-data-sentinel-2/tiles/13/V/EG/S2B_MSIL1C_20200503T182919_N0209_R027_T13VEG_20200503T220524.SAFE
-
-// https://storage.googleapis.com/gcp-public-data-sentinel-2/L2/tiles/13/V/EG/S2B_MSIL1C_20200503T182919_N0209_R027_T13VEG_20200503T220524.SAFE
-
-// therox.sentinel:Z%M8L2F!jEWY9R
-
-// {
-// 	"type": "service_account",
-// 	"project_id": "my-project-sentinel-341413",
-// 	"private_key_id": "17b2465ee2c50e8af89d67bbd1766bd0b961724c",
-// 	"private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCtrEemoB4H6SQB\n+sJA1O2AqnqiJYx36A9IGuhwVUdkkpMU+DTo5Y7rKnRG7pWO/n+1nd5eZCHAwj2o\nxaLL6rgFX6KK/tPWPci2D0+msw9X6RcSxeOEubJVm6/4EYzRuZReCwNOxCQ3pJWi\nJ+AH/gli/5jSPVNZftoGumqpd3lyENgifQue1RrPdCwBTpX3qEPw0fmia61kZd6I\nFiDIr6E7YaK+UMkSLLiXiiaEgFOeSj2fcFmExFqi2Db3M+PRgAPczm6+4WyeHJ8T\nCVf925fC2KYS639ikNAt6rZNfWQYIUkYWsnXyKKAOfJgSICSDgYhMOUlElgJZoEH\naHkTbK4DAgMBAAECggEAETnS9YemKDoLVJhEUjKMcsRLW5qGfzzTid8ECmL7Aie4\n/Ph4JFg4lRdl5xndAwzif+duWfBr70w/hLuYSnTigcNFl6xvjdgc+KngyEkJuY9+\nDAz4DynCstO5YCKQKXEocoInIYCPkxFOYiy6/4VGoGd3sfVb4gw/SzGMSM4ii+9O\ncNRmmOlfZrYqxsflFnCKL79D4OyOaCE4r/mmIIhz0GzCovDIVtUEwK7xigzAVmAg\nBbURkzq5kfw5X+VcUBePSlTjY+T+DU8+/cSmq3XF1bcY6fMzD9V2Hzdh0JWUYRNg\n1g88nDSWAuSGhGwezScfXq+T6uzp+YrEF+ppQPZX8QKBgQDm0rSpiecuncGAaxJK\nbQATFJza4qxmOdbnouUZD236KqR6YSsy/JwbebJhrzmCkFmVjue5txjno4oJM+F4\nEGFLGqCUo4YVgnD3/927PaDIDmFGvPrei2ZjTcXL8wt97VV/h9x3eSsT7NftdK10\nQGuVAMVn/6W0YkhDeVNyBYoMCwKBgQDAncQ7LC3u690DekzJ13EEdvabwUrPhWpl\n+QOUIOo1pfnvi+q2HhIRSzk7Zrfeac0rlTJq8LH+nriaRTq0UZSUKcmluTNG8wdx\nDfWuJ1Q9qw54xmYomqdIcjvZF4gPTy6WsO2/hU7FJCHV8F9Bq+pi7iFfkCvEVeUp\nxW8njnIo6QKBgAh+wL9sn+GLVM/RIP80O8h3/b3gkc/BWTN1P1FIzBdk8mC+qsRZ\nn7UzKWmG9WrkvSdP9x9Sqcv8rNvh2O5+S9ZjyH0v94NbJaU6+YImpoA2Z0YfNmxy\nXPZSqnDzJP0hewASk/6hqwA0u021+ZxJsqvtN1a4hfS5mUdCc9vCcG45AoGAEvi3\nFjjwwUKb/zaxj4PXzt/ExGySaMQ0SZzwPEvNpcEWUADQ+mUV1Hw7Q92HKLH1EmDc\nmWnhrjmF5zQAZzhN0RYYlWkbYtaXGgyM8T1Qb86EW2L3NvKcnWca+/P0Y8Whyhfd\nIusHaiV367GEQFyldl8MDHSPywPG0YlvvE6scdkCgYAnqkPwjf/MpTUC8qhtmpuP\njzuvIC21N/nGRWKELgh0E6XpF9yzhkbZXizGa/N731dyqgVTekPEcz4EGG+55r7K\n55wJ0KMYIgkG1LK3cBV3OImG55u0/RRpurd0nJlhLlxD+UfstJ6xz9WFcyV87EGh\nHQqaGipgYIeojmp01a4Z0w==\n-----END PRIVATE KEY-----\n",
-// 	"client_email": "sentinel@my-project-sentinel-341413.iam.gserviceaccount.com",
-// 	"client_id": "111722094265434604179",
-// 	"auth_uri": "https://accounts.google.com/o/oauth2/auth",
-// 	"token_uri": "https://oauth2.googleapis.com/token",
-// 	"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-// 	"client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sentinel%40my-project-sentinel-341413.iam.gserviceaccount.com"
-//   }
-// export GOOGLE_APPLICATION_CREDENTIALS=my-project-sentinel-341413-17b2465ee2c5.json
