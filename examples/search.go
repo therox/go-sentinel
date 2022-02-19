@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	sentinel "github.com/therox/go-sentinel"
 )
 
@@ -13,6 +15,9 @@ func main() {
 		Platforms: []sentinel.Platform{sentinel.PlanformSentinel2},
 	}
 
-	client.Query(searchParameters)
+	_, err := client.Query(searchParameters)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
