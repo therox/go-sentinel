@@ -37,7 +37,7 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 
 	//  Union of params
 	urlParams += strings.Join(paramList, " AND ")
-	fmt.Printf("%+v\n", urlParams)
+	// fmt.Printf("%+v\n", urlParams)
 
 	urlParams = url.QueryEscape(urlParams)
 	urlParams += fmt.Sprintf("&format=json&rows=%d", sc.rows)
@@ -67,37 +67,43 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 	if err != nil {
 		return qr, err
 	}
-	fmt.Printf("Found %+v items, %s \n", qr.Feed.TotalResults, qr.Feed.Title)
-	fmt.Printf("Links: %+v\n", qr.Feed.Link)
-	page := 1
-	offset := 0
+
+	offset := sc.rows
 	for {
 		if len(qr.Feed.Entries) < qr.Feed.TotalResults {
-			page++
-			offset += sc.rows
+
 			nextURL := queryURL + fmt.Sprintf("&start=%d", offset)
 
-			fmt.Printf("Page %d, url: %s\n", page, nextURL)
 			req, err := http.NewRequest(http.MethodGet, nextURL, nil)
 			if err != nil {
 				return qr, err
 			}
 			req.SetBasicAuth(sc.user, sc.password)
+			req.Header.Add("Content-Type", "application/json")
 			resp, err := sc.httpClient.Do(req)
 			if err != nil {
 				return qr, err
 			}
-			req.Header.Add("Content-Type", "application/json")
-			defer resp.Body.Close()
 			bs, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
+				resp.Body.Close()
 				return qr, err
 			}
+			fmt.Println(resp.StatusCode)
+			if resp.StatusCode != 200 {
+				fmt.Printf("Response error: %s. Repeating.", bs)
+				resp.Body.Close()
+				continue
+			}
+
 			tempQR, err := processQueryResponse(bs)
 			if err != nil {
+				resp.Body.Close()
 				return qr, err
 			}
 			qr.Feed.Entries = append(qr.Feed.Entries, tempQR.Feed.Entries...)
+			resp.Body.Close()
+			offset += sc.rows
 		} else {
 			break
 		}
