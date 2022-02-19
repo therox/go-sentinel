@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	sentinel "github.com/therox/go-sentinel"
@@ -13,11 +14,13 @@ func main() {
 
 	searchParameters := sentinel.SearchParameters{
 		Platforms: []sentinel.Platform{sentinel.PlanformSentinel2},
+		TileIDs:   []string{"37UCU", "37UCT"},
 	}
 
-	_, err := client.Query(searchParameters)
+	res, err := client.Query(searchParameters)
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(len(res.Feed.Entries))
 
 }

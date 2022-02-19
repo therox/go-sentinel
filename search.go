@@ -5,30 +5,50 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
 func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) {
-	var qr QueryResponse
 	fmt.Printf("%+v\n", params)
 
-	searchURL := sc.searchURL
-	if len(params.Platforms) > 0 {
-		searchURL += "("
-		for i := range params.Platforms {
-			if i > 0 {
-				searchURL += " OR "
-			}
-			searchURL += fmt.Sprintf("platformname:'%s'", params.Platforms[i])
-		}
-		searchURL += ")"
-	}
-	searchURL += "&format=json&rows=" + strconv.Itoa(sc.rows)
-	fmt.Printf("%+v\n", searchURL)
+	// searchURL := sc.searchURL
+	urlParams := ""
 
-	// ======= requesting data =====
-	req, err := http.NewRequest(http.MethodGet, searchURL, nil)
+	paramList := make([]string, 0)
+
+	if len(params.Platforms) > 0 {
+		innerParamList := make([]string, len(params.Platforms))
+		for i := range params.Platforms {
+			innerParamList[i] = fmt.Sprintf("platformname:'%s'", params.Platforms[i])
+		}
+		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
+	}
+
+	if len(params.TileIDs) > 0 {
+		innerParamList := make([]string, len(params.TileIDs))
+		for i := range params.TileIDs {
+			innerParamList[i] = fmt.Sprintf("tileid:%s", params.TileIDs[i])
+		}
+		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
+	}
+
+	//  Union of params
+	urlParams += strings.Join(paramList, " AND ")
+	fmt.Printf("%+v\n", urlParams)
+
+	urlParams = url.QueryEscape(urlParams)
+	urlParams += fmt.Sprintf("&format=json&rows=%d", sc.rows)
+
+	return sc.doQuery(sc.searchURL + urlParams)
+}
+
+func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
+	var qr QueryResponse
+	// ======= requesting first data page =====
+	req, err := http.NewRequest(http.MethodGet, queryURL, nil)
 	if err != nil {
 		return qr, err
 	}
@@ -43,7 +63,48 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 	if err != nil {
 		return qr, err
 	}
-	return processQueryResponse(bs)
+	qr, err = processQueryResponse(bs)
+	if err != nil {
+		return qr, err
+	}
+	fmt.Printf("Found %+v items, %s \n", qr.Feed.TotalResults, qr.Feed.Title)
+	fmt.Printf("Links: %+v\n", qr.Feed.Link)
+	page := 1
+	offset := 0
+	for {
+		if len(qr.Feed.Entries) < qr.Feed.TotalResults {
+			page++
+			offset += sc.rows
+			nextURL := queryURL + fmt.Sprintf("&start=%d", offset)
+
+			fmt.Printf("Page %d, url: %s\n", page, nextURL)
+			req, err := http.NewRequest(http.MethodGet, nextURL, nil)
+			if err != nil {
+				return qr, err
+			}
+			req.SetBasicAuth(sc.user, sc.password)
+			resp, err := sc.httpClient.Do(req)
+			if err != nil {
+				return qr, err
+			}
+			req.Header.Add("Content-Type", "application/json")
+			defer resp.Body.Close()
+			bs, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return qr, err
+			}
+			tempQR, err := processQueryResponse(bs)
+			if err != nil {
+				return qr, err
+			}
+			qr.Feed.Entries = append(qr.Feed.Entries, tempQR.Feed.Entries...)
+		} else {
+			break
+		}
+	}
+	// Repeat until we get TotalResults items
+
+	return qr, nil
 }
 
 func processQueryResponse(bs []byte) (QueryResponse, error) {
@@ -51,8 +112,14 @@ func processQueryResponse(bs []byte) (QueryResponse, error) {
 	var res QueryResponse
 	err := json.Unmarshal(bs, &res)
 	if err != nil {
+		fmt.Println(string(bs))
 		return res, err
 	}
+
+	res.Feed.TotalResults, _ = strconv.Atoi(res.Feed.TotalResultsStr)
+	res.Feed.StartIndex, _ = strconv.Atoi(res.Feed.StartIndexStr)
+	res.Feed.ItemsPerPage, _ = strconv.Atoi(res.Feed.ItemsPerPageStr)
+
 	// fmt.Printf("%+v\n", res.Feed.Entries[0])
 	// тут мы анмаршаллим Str, Date, Int, Double
 	for i := range res.Feed.Entries {
@@ -202,8 +269,6 @@ func processQueryResponse(bs []byte) (QueryResponse, error) {
 			}
 		}
 	}
-	fmt.Println(res.Feed.Entries[1].TileId, res.Feed.Entries[0].FileName)
-	fmt.Println(string(res.Feed.Entries[0].Str))
 	return res, nil
 }
 
