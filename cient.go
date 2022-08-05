@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
+
+	pb "github.com/cheggaaa/pb/v3"
 )
 
 type SentinelClient struct {
@@ -21,7 +24,7 @@ type SentinelClient struct {
 func NewClient() *SentinelClient {
 	credentials := strings.Split(os.Getenv("SENTINEL_CREDENTIALS"), ":")
 	if len(credentials) < 2 {
-		log.Fatalf("Please provide Sentinel credentials!")
+		log.Fatalf("Please provide SENTINEL_CREDENTIALS!")
 	}
 
 	return &SentinelClient{
@@ -37,8 +40,6 @@ func (c *SentinelClient) Download(id string, dst string) error {
 	fmt.Println("GOT ID: ", id)
 	link := fmt.Sprintf("https://scihub.copernicus.eu/dhus/odata/v1/Products('%s')/$value", id)
 
-	fmt.Printf("Downloading file %s to %s\n", link, dst)
-
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
 		return fmt.Errorf("error on create request: %s", err)
@@ -50,9 +51,15 @@ func (c *SentinelClient) Download(id string, dst string) error {
 		return fmt.Errorf("error on get file: %s", err)
 	}
 
-	fmt.Println("Headers: ", resp.Header.Get("Content-Disposition"))
+	size, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
+	if err != nil {
+		panic(err)
+	}
 	dst_fileName := strings.Trim(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Disposition"), "=")[1]), "\"")
 	defer resp.Body.Close()
+
+	bar := pb.Full.Start64(size)
+	barReader := bar.NewProxyReader(resp.Body)
 
 	out, err := os.Create(path.Join(dst, dst_fileName))
 	if err != nil {
@@ -60,10 +67,10 @@ func (c *SentinelClient) Download(id string, dst string) error {
 	}
 	defer out.Close()
 
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(out, barReader)
 	if err != nil {
 		return fmt.Errorf("error on saving file: %s", err)
 	}
-	fmt.Println("Download complete")
+	bar.Finish()
 	return nil
 }
