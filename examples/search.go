@@ -37,7 +37,7 @@ func main() {
 	if resCount > 0 {
 		// fmt.Printf("%+v\n", entries[0])
 		// fmt.Printf("%+v\n", string(entries[0].Date))
-		client.Download(entries[0].ID, "/tmp/test.zip")
+		client.Download(entries[0].ID, "/tmp")
 		// fmt.Printf("%+v\n", entries[0].Link[0])
 		// tools.DownloadFile(entries[0].Link[0].HREF, "/tmp/1.zip")
 

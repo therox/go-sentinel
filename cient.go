@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -37,11 +38,6 @@ func (c *SentinelClient) Download(id string, dst string) error {
 	link := fmt.Sprintf("https://scihub.copernicus.eu/dhus/odata/v1/Products('%s')/$value", id)
 
 	fmt.Printf("Downloading file %s to %s\n", link, dst)
-	out, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("error on create local index file: %s", err)
-	}
-	defer out.Close()
 
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
@@ -53,12 +49,21 @@ func (c *SentinelClient) Download(id string, dst string) error {
 	if err != nil {
 		return fmt.Errorf("error on get file: %s", err)
 	}
+
+	fmt.Println("Headers: ", resp.Header.Get("Content-Disposition"))
+	dst_fileName := strings.Trim(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Disposition"), "=")[1]), "\"")
 	defer resp.Body.Close()
+
+	out, err := os.Create(path.Join(dst, dst_fileName))
+	if err != nil {
+		return fmt.Errorf("error on create local file: %s", err)
+	}
+	defer out.Close()
 
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
 		return fmt.Errorf("error on saving file: %s", err)
 	}
-	fmt.Println("Download ready")
+	fmt.Println("Download complete")
 	return nil
 }
