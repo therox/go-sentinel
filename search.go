@@ -35,9 +35,29 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
 	}
 
+	if len(params.Filenames) > 0 {
+		innerParamList := make([]string, len(params.Filenames))
+		for i := range params.Filenames {
+			innerParamList[i] = fmt.Sprintf("filename:%s", params.Filenames[i])
+		}
+		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
+	}
+
+	if len(params.ProductTypes) > 0 {
+		innerParamList := make([]string, len(params.ProductTypes))
+		for i := range params.ProductTypes {
+			innerParamList[i] = fmt.Sprintf("producttype:%s", params.ProductTypes[i])
+		}
+		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
+	}
+
+	if params.BeginPosition != "" {
+		paramList = append(paramList, fmt.Sprintf("beginposition:%s", params.BeginPosition))
+	}
+
 	//  Union of params
 	urlParams += strings.Join(paramList, " AND ")
-	// fmt.Printf("%+v\n", urlParams)
+	fmt.Printf("> %+v\n", urlParams)
 
 	urlParams = url.QueryEscape(urlParams)
 	urlParams += fmt.Sprintf("&format=json&rows=%d", sc.rows)
@@ -67,6 +87,7 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 	if err != nil {
 		return qr, err
 	}
+	fmt.Printf("Found %d results\n", qr.Feed.TotalResults)
 
 	offset := sc.rows
 	for {
@@ -128,6 +149,11 @@ func processQueryResponse(bs []byte) (QueryResponse, error) {
 
 	// fmt.Printf("%+v\n", res.Feed.Entries[0])
 	// тут мы анмаршаллим Str, Date, Int, Double
+
+	res.Feed.Entries, err = unpackQueryEntryResponse(res.Feed.EntriesRaw)
+	if err != nil {
+		return res, err
+	}
 	for i := range res.Feed.Entries {
 		strList, err := unpackTypedCommonData(res.Feed.Entries[i].Str)
 		if err != nil {
@@ -287,6 +313,22 @@ func unpackTypedCommonData(bs []byte) (res []TypedCommonData, err error) {
 		var tempRes TypedCommonData
 		err = json.Unmarshal(bs, &tempRes)
 		return []TypedCommonData{tempRes}, err
+	case '[':
+		err = json.Unmarshal(bs, &res)
+		return
+	}
+	return
+}
+
+func unpackQueryEntryResponse(bs []byte) (res []QueryEntryResponse, err error) {
+	if len(bs) == 0 {
+		return res, nil
+	}
+	switch bs[0] {
+	case '{':
+		var tempRes QueryEntryResponse
+		err = json.Unmarshal(bs, &tempRes)
+		return []QueryEntryResponse{tempRes}, err
 	case '[':
 		err = json.Unmarshal(bs, &res)
 		return

@@ -15,8 +15,11 @@ const (
 )
 
 type SearchParameters struct {
-	Platforms []Platform
-	TileIDs   []string // tileid:37UCU
+	Platforms     []Platform
+	TileIDs       []string // tileid:37UCU
+	BeginPosition string   // [beginposition:[2014-01-01T00:00:00.000Z TO NOW]]
+	ProductTypes  []string
+	Filenames     []string
 }
 
 type TypedCommonData struct {
@@ -107,6 +110,7 @@ type QueryResponse struct {
 			Type string `json:"type"`
 			HREF string `json:"href"`
 		}
-		Entries []QueryEntryResponse `json:"entry"`
+		Entries    []QueryEntryResponse
+		EntriesRaw json.RawMessage `json:"entry"`
 	} `json:"feed"`
 }
