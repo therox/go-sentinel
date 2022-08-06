@@ -23,7 +23,7 @@ func main() {
 			TileIDs: []string{tile},
 			// ProductTypes: []string{"S2MSI2A", "S2MS2Ap"},
 			// ProductTypes:  []string{"S2MSI1C"},
-			BeginPosition: "[2022-01-01T00:00:00.000Z TO NOW]",
+			BeginPosition: "[2017-01-01T00:00:00.000Z TO 2017-09-10T00:00:00.000Z]",
 		}
 
 		res, err := client.Query(searchParameters)
@@ -36,11 +36,12 @@ func main() {
 	fmt.Printf("Total found %d items\n", resCount)
 
 	if resCount > 0 {
-		// fmt.Printf("%+v\n", entries[0])
-		// fmt.Printf("%+v\n", string(entries[0].Date))
-		client.Download(entries[0].ID, "/tmp")
-		// fmt.Printf("%+v\n", entries[0].Link[0])
-		// tools.DownloadFile(entries[0].Link[0].HREF, "/tmp/1.zip")
+		for _, entry := range entries {
+			err := client.Download(entry.ID, "/tmp")
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 
 	}
 
