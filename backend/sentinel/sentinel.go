@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -57,7 +56,7 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	}
 
 	if resp.StatusCode != 200 {
-		bs, err := ioutil.ReadAll(resp.Body)
+		bs, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("error on read response body: %s", err)
 		}
@@ -85,7 +84,7 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	}
 	defer out.Close()
 
-	var hashMD5 = md5.New()
+	hashMD5 := md5.New()
 	w := io.MultiWriter(out, hashMD5)
 
 	_, err = io.Copy(w, barReader)
