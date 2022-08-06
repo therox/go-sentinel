@@ -1,6 +1,7 @@
 package sentinel_engine
 
 import (
+	"crypto/md5"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -70,6 +71,8 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 
 	dst_fileName := strings.Trim(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Disposition"), "=")[1]), "\"")
 
+	checkSum := resp.Header.Get("Etag")
+
 	bar := pb.Full.Start64(size)
 	bar.Set("prefix", fmt.Sprintf("[ %s ]", dst_fileName))
 
@@ -82,9 +85,17 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	}
 	defer out.Close()
 
-	_, err = io.Copy(out, barReader)
+	var hashMD5 = md5.New()
+	w := io.MultiWriter(out, hashMD5)
+
+	_, err = io.Copy(w, barReader)
 	if err != nil {
 		return fmt.Errorf("error on saving file: %s", err)
+	}
+	md5Sum := hashMD5.Sum(nil)
+
+	if checkSum != fmt.Sprintf("%x", md5Sum) {
+		return fmt.Errorf("integrity error: checksum mismatch")
 	}
 
 	return nil
