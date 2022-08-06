@@ -114,3 +114,7 @@ type QueryResponse struct {
 		EntriesRaw json.RawMessage `json:"entry"`
 	} `json:"feed"`
 }
+
+func (qer *QueryEntryResponse) GetID() string {
+	return qer.ID
+}
