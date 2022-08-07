@@ -78,7 +78,8 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	barReader := bar.NewProxyReader(resp.Body)
 	defer barReader.Close()
 
-	out, err := os.Create(path.Join(dst, dst_fileName))
+	filePath := path.Join(dst, dst_fileName)
+	out, err := os.Create(filePath)
 	if err != nil {
 		return fmt.Errorf("error on create local file: %s", err)
 	}
@@ -91,9 +92,9 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	if err != nil {
 		return fmt.Errorf("error on saving file: %s", err)
 	}
-	md5Sum := hashMD5.Sum(nil)
 
-	if checkSum != fmt.Sprintf("%x", md5Sum) {
+	if checkSum != fmt.Sprintf("%x", hashMD5.Sum(nil)) {
+		os.RemoveAll(filePath)
 		return fmt.Errorf("integrity error: checksum mismatch")
 	}
 

@@ -35,7 +35,7 @@ func main() {
 			ProductTypes: []string{"S2MSI2A", "S2MS2Ap"},
 			// ProductTypes: []string{"S2MSI2A"},
 			// ProductTypes:  []string{"S2MSI1C"},
-			// BeginPosition: "[2022-01-01T00:00:00.000Z TO NOW]",
+			BeginPosition: "[2022-01-01T00:00:00.000Z TO NOW]",
 			// BeginPosition: "[2022-01-01T00:00:00.000Z TO NOW]",
 		}
 
@@ -50,13 +50,13 @@ func main() {
 
 	if resCount > 0 {
 		for _, entry := range entries {
-			if entry.ProductType != "S2MSI1C" {
-				fmt.Printf("%+v\n", entry)
-			}
-			// err := client.Download(entry.GetID(), "/tmp")
-			// if err != nil {
-			// 	fmt.Println(err)
+			// if entry.ProductType != "S2MSI1C" {
+			// 	fmt.Printf("%+v\n", entry)
 			// }
+			err := client.Download(entry.GetID(), "/tmp")
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }
