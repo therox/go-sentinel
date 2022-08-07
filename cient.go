@@ -24,8 +24,9 @@ func NewClient(user string, password string, httpTimeout time.Duration) *Sentine
 		password:   password,
 		httpClient: &http.Client{},
 		searchURL:  "https://scihub.copernicus.eu/dhus/search?q=",
-		rows:       100,
-		dlEngine:   sentinel_engine.NewSentinelEngine(user, password, httpTimeout),
+		// searchURL: "https://apihub.copernicus.eu/apihub/search?q=",
+		rows:     100,
+		dlEngine: sentinel_engine.NewSentinelEngine(user, password, httpTimeout),
 	}
 }
 

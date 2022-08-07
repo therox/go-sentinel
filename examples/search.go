@@ -26,13 +26,17 @@ func main() {
 	resCount := 0
 	entries := make([]sentinel.QueryEntryResponse, 0)
 	for _, tile := range tiles {
+		print("Searching for tile " + tile + "...")
 		searchParameters := sentinel.SearchParameters{
 			Platforms: []sentinel.Platform{sentinel.PlanformSentinel2},
 			// Filenames:     []string{fmt.Sprintf("*%s*", tile)},
-			TileIDs: []string{tile},
-			// ProductTypes: []string{"S2MSI2A", "S2MS2Ap"},
+			// TileIDs:      []string{tile},
+			Footprint:    "POLYGON((35.8207689450001 50.518113703,37.3657427630001 50.4703606300001,37.2773703820001 49.485620291,35.763545148 49.531744406,35.8207689450001 50.518113703))",
+			ProductTypes: []string{"S2MSI2A", "S2MS2Ap"},
+			// ProductTypes: []string{"S2MSI2A"},
 			// ProductTypes:  []string{"S2MSI1C"},
-			BeginPosition: "[2017-01-01T00:00:00.000Z TO 2017-09-10T00:00:00.000Z]",
+			// BeginPosition: "[2022-01-01T00:00:00.000Z TO NOW]",
+			// BeginPosition: "[2022-01-01T00:00:00.000Z TO NOW]",
 		}
 
 		res, err := client.Query(searchParameters)
@@ -46,12 +50,13 @@ func main() {
 
 	if resCount > 0 {
 		for _, entry := range entries {
-			err := client.Download(entry.GetID(), "/tmp")
-			if err != nil {
-				fmt.Println(err)
+			if entry.ProductType != "S2MSI1C" {
+				fmt.Printf("%+v\n", entry)
 			}
+			// err := client.Download(entry.GetID(), "/tmp")
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
 		}
-
 	}
-
 }

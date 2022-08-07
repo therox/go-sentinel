@@ -12,7 +12,7 @@ import (
 )
 
 func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) {
-	fmt.Printf("%+v\n", params)
+	// fmt.Printf("%+v\n", params)
 
 	// searchURL := sc.searchURL
 	urlParams := ""
@@ -55,17 +55,22 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 		paramList = append(paramList, fmt.Sprintf("beginposition:%s", params.BeginPosition))
 	}
 
+	if params.Footprint != "" {
+		paramList = append(paramList, fmt.Sprintf("footprint:\"Intersects(%s)\"", params.Footprint))
+	}
+
 	//  Union of params
 	urlParams += strings.Join(paramList, " AND ")
-	fmt.Printf("> %+v\n", urlParams)
+	// fmt.Printf("> %+v\n", urlParams)
 
 	urlParams = url.QueryEscape(urlParams)
 	urlParams += fmt.Sprintf("&format=json&rows=%d", sc.rows)
 
-	return sc.doQuery(sc.searchURL + urlParams)
+	return sc.doQuery(fmt.Sprintf("%s%s", sc.searchURL, urlParams))
 }
 
 func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
+	fmt.Printf("%s\n", queryURL)
 	var qr QueryResponse
 	// ======= requesting first data page =====
 	req, err := http.NewRequest(http.MethodGet, queryURL, nil)
