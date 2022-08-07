@@ -37,3 +37,11 @@ func (c *SentinelClient) Download(id string, dst string) error {
 
 	return c.dlEngine.Download(id, dst)
 }
+
+func (c *SentinelClient) IsOnline(id string) (bool, error) {
+	if c.dlEngine == nil {
+		return false, fmt.Errorf("no download engine available")
+	}
+
+	return c.dlEngine.IsOnline(id)
+}

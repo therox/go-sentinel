@@ -59,6 +59,14 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 		paramList = append(paramList, fmt.Sprintf("footprint:\"Intersects(%s)\"", params.Footprint))
 	}
 
+	if len(params.CloudCoverPercentage) > 0 {
+		innerParamList := make([]string, len(params.CloudCoverPercentage))
+		for i := range params.CloudCoverPercentage {
+			innerParamList[i] = fmt.Sprintf("cloudcoverpercentage:%s", params.CloudCoverPercentage[i])
+		}
+		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
+	}
+
 	//  Union of params
 	urlParams += strings.Join(paramList, " AND ")
 	// fmt.Printf("> %+v\n", urlParams)

@@ -18,6 +18,7 @@ type SentinelEngine struct {
 	user       string
 	password   string
 	httpClient *http.Client
+	dhusURL    string
 }
 
 // NewSentinelEngine returns a new SentinelEngine
@@ -31,11 +32,17 @@ func NewSentinelEngine(user string, password string, httpTimeout time.Duration) 
 		httpClient: &http.Client{
 			Timeout: httpTimeout,
 		},
+		dhusURL: "https://scihub.copernicus.eu/dhus/odata/v1",
 	}
 }
 
-func (se SentinelEngine) Download(ProductID string, dst string) error {
-	link := fmt.Sprintf("https://scihub.copernicus.eu/dhus/odata/v1/Products('%s')/$value", ProductID)
+func (se SentinelEngine) getURL(product_id string, suffix string) string {
+	return fmt.Sprintf("%s/Products('%s')/%s", se.dhusURL, product_id, suffix)
+}
+
+func (se SentinelEngine) Download(productID string, dst string) error {
+	// link := fmt.Sprintf("%s/Products('%s')/$value", se.dhusURL, productID)
+	link := se.getURL(productID, "$value")
 
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
@@ -51,16 +58,13 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 202 {
-		fmt.Printf("Product with product id %s is not ready yet. Triggered offline retrieval.\n", ProductID)
+		fmt.Printf("Product with product id %s is not ready yet. Triggered offline retrieval.\n", productID)
 		return fmt.Errorf("file triggered from long-term archive")
 	}
 
 	if resp.StatusCode != 200 {
-		bs, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("error on read response body: %s", err)
-		}
-		return fmt.Errorf("error on GET file: %s", string(bs))
+
+		return fmt.Errorf("%d:%s", resp.StatusCode, resp.Header.Get("Cause-Message"))
 	}
 
 	size, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
@@ -99,4 +103,28 @@ func (se SentinelEngine) Download(ProductID string, dst string) error {
 	}
 
 	return nil
+}
+
+func (se SentinelEngine) IsOnline(productID string) (bool, error) {
+	link := se.getURL(productID, "Online/$value")
+
+	req, err := http.NewRequest(http.MethodGet, link, nil)
+	if err != nil {
+		return false, fmt.Errorf("error on create request: %s", err)
+	}
+	req.SetBasicAuth(se.user, se.password)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return false, fmt.Errorf("error on GET Online status: %s", err)
+	}
+	defer resp.Body.Close()
+
+	bs, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, fmt.Errorf("error on read response body: %s", err)
+	}
+
+	return string(bs) == "true", nil
+
 }

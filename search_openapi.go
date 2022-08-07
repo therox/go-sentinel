@@ -15,12 +15,13 @@ const (
 )
 
 type SearchParameters struct {
-	Platforms     []Platform
-	Footprint     string
-	TileIDs       []string // tileid:37UCU
-	BeginPosition string   // [beginposition:[2014-01-01T00:00:00.000Z TO NOW]]
-	ProductTypes  []string
-	Filenames     []string
+	Platforms            []Platform
+	Footprint            string
+	TileIDs              []string // tileid:37UCU
+	BeginPosition        string   // [beginposition:[2014-01-01T00:00:00.000Z TO NOW]]
+	ProductTypes         []string
+	Filenames            []string
+	CloudCoverPercentage []string // [0 TO 100]
 }
 
 type TypedCommonData struct {
