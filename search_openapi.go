@@ -7,6 +7,14 @@ import (
 
 type Platform string
 
+type AreaRelation string
+
+const (
+	AreaRelationIntersects AreaRelation = "Intersects"
+	AreaRelationContains   AreaRelation = "Contains"
+	AreaRelationIsWithin   AreaRelation = "IsWithin"
+)
+
 const (
 	PlanformSentinel1          Platform = "Sentinel-1"
 	PlanformSentinel2          Platform = "Sentinel-2"
@@ -17,6 +25,7 @@ const (
 type SearchParameters struct {
 	Platforms            []Platform
 	Footprint            string
+	AreaRelation         AreaRelation
 	TileIDs              []string   // tileid:37UCU
 	BeginDate            time.Time  // Ingestion date from [2014-01-01T00:00:00.000Z TO NOW]
 	EndDate              *time.Time // Ingestion date to, NOW if not set

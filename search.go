@@ -59,7 +59,21 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 	}
 
 	if params.Footprint != "" {
-		paramList = append(paramList, fmt.Sprintf("footprint:\"Intersects(%s)\"", params.Footprint))
+		areaRelation := AreaRelationIntersects
+		if params.AreaRelation != "" {
+			isFound := false
+			for _, ar := range []AreaRelation{AreaRelationIntersects, AreaRelationContains, AreaRelationIsWithin} {
+				if strings.EqualFold(strings.ToLower(string(params.AreaRelation)), strings.ToLower(string(ar))) {
+					isFound = true
+					areaRelation = ar
+					break
+				}
+			}
+			if !isFound {
+				return QueryResponse{}, fmt.Errorf("incorrect AOI relation provided: %s", params.AreaRelation)
+			}
+		}
+		paramList = append(paramList, fmt.Sprintf("footprint:\"%s(%s)\"", areaRelation, params.Footprint))
 	}
 
 	if len(params.CloudCoverPercentage) > 0 {
