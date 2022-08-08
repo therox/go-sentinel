@@ -27,13 +27,15 @@ func main() {
 	entries := make([]sentinel.QueryEntryResponse, 0)
 	for _, tile := range tiles {
 		print("Searching for tile " + tile + "...")
+		et := time.Date(2022, 3, 1, 0, 0, 0, 0, time.UTC)
 		searchParameters := sentinel.SearchParameters{
 			Platforms: []sentinel.Platform{sentinel.PlanformSentinel2},
 			// Filenames:     []string{fmt.Sprintf("*%s*", tile)},
 			// TileIDs:      []string{tile},
-			Footprint:     "POLYGON((35.8207689450001 50.518113703,37.3657427630001 50.4703606300001,37.2773703820001 49.485620291,35.763545148 49.531744406,35.8207689450001 50.518113703))",
-			ProductTypes:  []string{"S2MSI2A", "S2MS2Ap"},
-			BeginPosition: "[2021-08-01T00:00:00.000Z TO NOW]",
+			Footprint:    "POLYGON((35.8207689450001 50.518113703,37.3657427630001 50.4703606300001,37.2773703820001 49.485620291,35.763545148 49.531744406,35.8207689450001 50.518113703))",
+			ProductTypes: []string{"S2MSI2A", "S2MS2Ap"},
+			BeginDate:    time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			EndDate:      &et,
 		}
 
 		res, err := client.Query(searchParameters)

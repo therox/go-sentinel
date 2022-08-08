@@ -51,8 +51,11 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 		paramList = append(paramList, fmt.Sprintf("(%s)", strings.Join(innerParamList, " OR ")))
 	}
 
-	if params.BeginPosition != "" {
-		paramList = append(paramList, fmt.Sprintf("beginposition:%s", params.BeginPosition))
+	if params.EndDate != nil {
+		// [2014-01-01T00:00:00.000Z TO NOW]]
+		paramList = append(paramList, fmt.Sprintf("beginposition:[%s TO %s]", params.BeginDate.Format("2006-01-02T15:04:05.000Z"), params.EndDate.Format("2006-01-02T15:04:05.000Z")))
+	} else {
+		paramList = append(paramList, fmt.Sprintf("beginposition:[%s TO NOW]", params.BeginDate.Format("2006-01-02T15:04:05.000Z")))
 	}
 
 	if params.Footprint != "" {
