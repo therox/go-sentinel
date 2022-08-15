@@ -41,7 +41,6 @@ func (se SentinelEngine) getURL(product_id string, suffix string) string {
 }
 
 func (se SentinelEngine) Download(productID string, dst string) error {
-	// link := fmt.Sprintf("%s/Products('%s')/$value", se.dhusURL, productID)
 	link := se.getURL(productID, "$value")
 
 	req, err := http.NewRequest("GET", link, nil)

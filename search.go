@@ -140,9 +140,8 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 				resp.Body.Close()
 				return qr, err
 			}
-			fmt.Println(resp.StatusCode)
 			if resp.StatusCode != 200 {
-				fmt.Printf("Response error: %s. Repeating.", bs)
+				fmt.Printf("Status code: %d, response error: %s. Repeating.", resp.StatusCode, bs)
 				resp.Body.Close()
 				continue
 			}
@@ -165,7 +164,6 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 }
 
 func processQueryResponse(bs []byte) (QueryResponse, error) {
-	// fmt.Printf("%s", bs)
 	var res QueryResponse
 	err := json.Unmarshal(bs, &res)
 	if err != nil {
@@ -176,9 +174,6 @@ func processQueryResponse(bs []byte) (QueryResponse, error) {
 	res.Feed.TotalResults, _ = strconv.Atoi(res.Feed.TotalResultsStr)
 	res.Feed.StartIndex, _ = strconv.Atoi(res.Feed.StartIndexStr)
 	res.Feed.ItemsPerPage, _ = strconv.Atoi(res.Feed.ItemsPerPageStr)
-
-	// fmt.Printf("%+v\n", res.Feed.Entries[0])
-	// тут мы анмаршаллим Str, Date, Int, Double
 
 	res.Feed.Entries, err = unpackQueryEntryResponse(res.Feed.EntriesRaw)
 	if err != nil {
