@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cheggaaa/pb/v3"
 	sentinel_engine "github.com/therox/go-sentinel/backend/sentinel"
 )
 
@@ -16,7 +15,6 @@ type SentinelClient struct {
 	searchURL  string
 	rows       int
 	dlEngine   dlEngine
-	pbPool     *pb.Pool
 }
 
 func NewClient(user string, password string, httpTimeout time.Duration) *SentinelClient {
@@ -29,9 +27,7 @@ func NewClient(user string, password string, httpTimeout time.Duration) *Sentine
 		// searchURL: "https://apihub.copernicus.eu/apihub/search?q=",
 		rows:     100,
 		dlEngine: sentinel_engine.NewSentinelEngine(user, password, httpTimeout),
-		pbPool:   pb.NewPool(),
 	}
-	sc.pbPool.Start()
 	return sc
 }
 
@@ -49,8 +45,4 @@ func (c *SentinelClient) IsOnline(id string) (bool, error) {
 	}
 
 	return c.dlEngine.IsOnline(id)
-}
-
-func (c *SentinelClient) Close() {
-	c.pbPool.Stop()
 }

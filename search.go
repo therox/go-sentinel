@@ -119,13 +119,7 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 		return qr, err
 	}
 	fmt.Printf("Found %d results\n", qr.Feed.TotalResults)
-	bar := pb.New(qr.Feed.TotalResults)
-	sc.pbPool.Stop()
-	sc.pbPool.Add(bar)
-	sc.pbPool.Start()
-	// bar.Start()
-
-	// bar :=  pb.Full.Start64(int64(qr.Feed.TotalResults))
+	bar := pb.Full.Start64(int64(qr.Feed.TotalResults))
 
 	offset := sc.rows
 	for {

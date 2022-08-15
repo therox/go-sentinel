@@ -18,7 +18,6 @@ func main() {
 	}
 
 	client := sentinel.NewClient(credentials[0], credentials[1], 60*time.Minute)
-	defer client.Close()
 
 	// Construct OpenAPI Search parameters
 	// tiles := []string{"36UYA", "36UYB", "36UYC", "36UYD", "36UYE", "37TDK", "37TDL", "37TEL", "37TEM", "37UCR", "37UCS", "37UCT", "37UCU", "37UCV", "37UDR", "37UDS", "37UDT", "37UDU", "37UDV", "37UEU", "37UEV", "37UFT", "37UFU", "37UFV", "37UGT", "37UGU", "38ULD", "44UPG", "45UUB"}
