@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/cheggaaa/pb/v3"
 )
 
 type SentinelEngine struct {
@@ -66,20 +64,14 @@ func (se SentinelEngine) Download(productID string, dst string) error {
 		return fmt.Errorf("%d:%s", resp.StatusCode, resp.Header.Get("Cause-Message"))
 	}
 
-	size, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
+	_, err = strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error on parse Content-Length: %s", err)
 	}
 
 	dst_fileName := strings.Trim(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Disposition"), "=")[1]), "\"")
 
 	checkSum := resp.Header.Get("Etag")
-
-	bar := pb.Full.Start64(size)
-	bar.Set("prefix", fmt.Sprintf("[ %s ]", dst_fileName))
-
-	barReader := bar.NewProxyReader(resp.Body)
-	defer barReader.Close()
 
 	filePath := path.Join(dst, dst_fileName)
 	out, err := os.Create(filePath)
@@ -91,7 +83,7 @@ func (se SentinelEngine) Download(productID string, dst string) error {
 	hashMD5 := md5.New()
 	w := io.MultiWriter(out, hashMD5)
 
-	_, err = io.Copy(w, barReader)
+	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		return fmt.Errorf("error on saving file: %s", err)
 	}
