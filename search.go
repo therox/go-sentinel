@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) {
@@ -97,6 +99,7 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 	fmt.Printf("%s\n", queryURL)
 	var qr QueryResponse
+
 	// ======= requesting first data page =====
 	req, err := http.NewRequest(http.MethodGet, queryURL, nil)
 	if err != nil {
@@ -118,6 +121,7 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 		return qr, err
 	}
 	fmt.Printf("Found %d results\n", qr.Feed.TotalResults)
+	bar := pb.Full.Start64(int64(qr.Feed.TotalResults))
 
 	offset := sc.rows
 	for {
@@ -153,8 +157,10 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 			}
 			qr.Feed.Entries = append(qr.Feed.Entries, tempQR.Feed.Entries...)
 			resp.Body.Close()
+			bar.SetCurrent(int64(len(qr.Feed.Entries)))
 			offset += sc.rows
 		} else {
+			bar.Finish()
 			break
 		}
 	}
