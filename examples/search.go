@@ -49,18 +49,17 @@ func main() {
 
 	if resCount > 0 {
 		for _, entry := range entries {
-			// if entry.ProductType != "S2MSI1C" {
-			// 	fmt.Printf("%+v\n", entry)
-			// }
 			isOnline, err := client.IsOnline(entry.ID)
 			if err != nil {
 				fmt.Println(err)
 			}
 			fmt.Printf("[%s] %t:%s\n", entry.FileName, isOnline, entry.BeginPosition)
-			// err := client.Download(entry.GetID(), "/tmp")
-			// if err != nil {
-			// 	fmt.Println(err)
-			// }
+			if isOnline {
+				err = client.Download(entry.GetID(), "/tmp")
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
 		}
 	}
 }
