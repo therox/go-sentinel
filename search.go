@@ -80,7 +80,6 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 
 	//  Union of params
 	urlParams += strings.Join(paramList, " AND ")
-	// fmt.Printf("> %+v\n", urlParams)
 
 	urlParams = url.QueryEscape(urlParams)
 	urlParams += fmt.Sprintf("&format=json&rows=%d", sc.rows)
@@ -89,7 +88,7 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 }
 
 func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
-	fmt.Printf("%s\n", queryURL)
+
 	var qr QueryResponse
 
 	// ======= requesting first data page =====
@@ -164,7 +163,6 @@ func processQueryResponse(bs []byte) (QueryResponse, error) {
 	var res QueryResponse
 	err := json.Unmarshal(bs, &res)
 	if err != nil {
-		fmt.Println(string(bs))
 		return res, err
 	}
 
