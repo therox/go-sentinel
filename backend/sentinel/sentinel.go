@@ -38,45 +38,46 @@ func (se SentinelEngine) getURL(product_id string, suffix string) string {
 	return fmt.Sprintf("%s/Products('%s')/%s", se.dhusURL, product_id, suffix)
 }
 
-func (se SentinelEngine) Download(productID string, dst string) error {
+func (se SentinelEngine) Download(productID string, dst string) (string, error) {
+	filePath := ""
 	link := se.getURL(productID, "$value")
 
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
-		return fmt.Errorf("error on create request: %s", err)
+		return filePath, fmt.Errorf("error on create request: %s", err)
 	}
 	req.SetBasicAuth(se.user, se.password)
 
 	resp, err := se.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("error on GET file: %s", err)
+		return filePath, fmt.Errorf("error on GET file: %s", err)
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 202 {
 		fmt.Printf("Product with product id %s is not ready yet. Triggered offline retrieval.\n", productID)
-		return fmt.Errorf("file triggered from long-term archive")
+		return filePath, fmt.Errorf("file triggered from long-term archive")
 	}
 
 	if resp.StatusCode != 200 {
 
-		return fmt.Errorf("%d:%s", resp.StatusCode, resp.Header.Get("Cause-Message"))
+		return filePath, fmt.Errorf("%d:%s", resp.StatusCode, resp.Header.Get("Cause-Message"))
 	}
 
 	_, err = strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
 	if err != nil {
-		return fmt.Errorf("error on parse Content-Length: %s", err)
+		return filePath, fmt.Errorf("error on parse Content-Length: %s", err)
 	}
 
 	dst_fileName := strings.Trim(strings.TrimSpace(strings.Split(resp.Header.Get("Content-Disposition"), "=")[1]), "\"")
 
 	checkSum := resp.Header.Get("Etag")
 
-	filePath := path.Join(dst, dst_fileName)
+	filePath = path.Join(dst, dst_fileName)
 	out, err := os.Create(filePath)
 	if err != nil {
-		return fmt.Errorf("error on create local file: %s", err)
+		return filePath, fmt.Errorf("error on create local file: %s", err)
 	}
 	defer out.Close()
 
@@ -85,15 +86,15 @@ func (se SentinelEngine) Download(productID string, dst string) error {
 
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
-		return fmt.Errorf("error on saving file: %s", err)
+		return filePath, fmt.Errorf("error on saving file: %s", err)
 	}
 
 	if checkSum != fmt.Sprintf("%x", hashMD5.Sum(nil)) {
 		os.RemoveAll(filePath)
-		return fmt.Errorf("integrity error: checksum mismatch")
+		return filePath, fmt.Errorf("integrity error: checksum mismatch")
 	}
 
-	return nil
+	return filePath, nil
 }
 
 func (se SentinelEngine) IsOnline(productID string) (bool, error) {

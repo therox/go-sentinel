@@ -55,10 +55,12 @@ func main() {
 			}
 			fmt.Printf("[%s] %t:%s\n", entry.FileName, isOnline, entry.BeginPosition)
 			if isOnline {
-				err = client.Download(entry.GetID(), "/tmp")
+				fName, err := client.Download(entry.GetID(), "/tmp")
 				if err != nil {
 					fmt.Println(err)
+					continue
 				}
+				fmt.Println("Downloaded to " + fName)
 			}
 		}
 	}

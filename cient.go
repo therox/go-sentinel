@@ -31,9 +31,9 @@ func NewClient(user string, password string, httpTimeout time.Duration) *Sentine
 	return sc
 }
 
-func (c *SentinelClient) Download(id string, dst string) error {
+func (c *SentinelClient) Download(id string, dst string) (string, error) {
 	if c.dlEngine == nil {
-		return fmt.Errorf("no download engine available")
+		return "", fmt.Errorf("no download engine available")
 	}
 
 	return c.dlEngine.Download(id, dst)
