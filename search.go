@@ -111,7 +111,6 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 	if err != nil {
 		return qr, err
 	}
-	fmt.Printf("Found %d results\n", qr.Feed.TotalResults)
 
 	offset := sc.rows
 	for {
@@ -135,7 +134,7 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 				return qr, err
 			}
 			if resp.StatusCode != 200 {
-				fmt.Printf("Status code: %d, response error: %s. Repeating.", resp.StatusCode, bs)
+				// repeating in case of error
 				resp.Body.Close()
 				continue
 			}
@@ -317,7 +316,7 @@ func processQueryResponse(bs []byte) (QueryResponse, error) {
 				res.Feed.Entries[i].IngestionDate, err = time.Parse(time.RFC3339, dateList[j].Content)
 			}
 			if err != nil {
-				fmt.Println(err)
+				return res, err
 			}
 		}
 	}

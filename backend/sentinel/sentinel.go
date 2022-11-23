@@ -12,6 +12,23 @@ import (
 	"time"
 )
 
+type (
+	ErrFileTriggered struct {
+		productID string
+	}
+	ErrIntegrityError struct {
+		productID string
+	}
+)
+
+func (e ErrFileTriggered) Error() string {
+	return fmt.Sprintf("file triggered from long-term archive: %s", e.productID)
+}
+
+func (e ErrIntegrityError) Error() string {
+	return fmt.Sprintf("dataset %s integrity error: checksum mismatch", e.productID)
+}
+
 type SentinelEngine struct {
 	user       string
 	password   string
@@ -56,8 +73,7 @@ func (se SentinelEngine) Download(productID string, dst string) (string, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 202 {
-		fmt.Printf("Product with product id %s is not ready yet. Triggered offline retrieval.\n", productID)
-		return filePath, fmt.Errorf("file triggered from long-term archive")
+		return filePath, ErrFileTriggered{productID: productID}
 	}
 
 	if resp.StatusCode != 200 {
@@ -91,7 +107,7 @@ func (se SentinelEngine) Download(productID string, dst string) (string, error) 
 
 	if checkSum != fmt.Sprintf("%x", hashMD5.Sum(nil)) {
 		os.RemoveAll(filePath)
-		return filePath, fmt.Errorf("integrity error: checksum mismatch")
+		return filePath, fmt.Errorf(ErrIntegrityError{productID: productID}.Error())
 	}
 
 	return filePath, nil
