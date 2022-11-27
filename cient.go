@@ -3,17 +3,14 @@ package sentinel
 import (
 	"fmt"
 	"net/http"
-	"time"
-
-	sentinel_engine "github.com/therox/go-sentinel/backend/sentinel"
 )
 
 type SentinelClient struct {
-	Searcher SentinelSearcher
+	Searcher ISentinelSearcher
 	dlEngine dlEngine
 }
 
-type SentinelSearcher interface {
+type ISentinelSearcher interface {
 	Query(params SearchParameters) (QueryResponse, error)
 }
 
@@ -25,18 +22,23 @@ type sentinelSearcher struct {
 	rows       int
 }
 
-func NewClient(user string, password string, httpTimeout time.Duration) *SentinelClient {
+func NewSentinelSearcher(user string, password string) ISentinelSearcher {
+	return sentinelSearcher{
+		user:       user,
+		password:   password,
+		httpClient: &http.Client{},
+		searchURL:  "https://scihub.copernicus.eu/dhus/search?q=",
+		// searchURL: "https://apihub.copernicus.eu/apihub/search?q=",
+		rows: 100,
+	}
+}
+
+// func NewClient(user string, password string, httpTimeout time.Duration) *SentinelClient {
+func NewClient(searcher ISentinelSearcher, engine dlEngine) *SentinelClient {
 
 	sc := &SentinelClient{
-		Searcher: &sentinelSearcher{
-			user:       user,
-			password:   password,
-			httpClient: &http.Client{},
-			searchURL:  "https://scihub.copernicus.eu/dhus/search?q=",
-			// searchURL: "https://apihub.copernicus.eu/apihub/search?q=",
-			rows: 100,
-		},
-		dlEngine: sentinel_engine.NewSentinelEngine(user, password, httpTimeout),
+		Searcher: searcher,
+		dlEngine: engine,
 	}
 	return sc
 }

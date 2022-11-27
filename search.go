@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func (ss *sentinelSearcher) Query(params SearchParameters) (QueryResponse, error) {
+func (ss sentinelSearcher) Query(params SearchParameters) (QueryResponse, error) {
 
 	urlParams := ""
 
@@ -87,7 +87,7 @@ func (ss *sentinelSearcher) Query(params SearchParameters) (QueryResponse, error
 	return ss.doQuery(fmt.Sprintf("%s%s", ss.searchURL, urlParams))
 }
 
-func (ss *sentinelSearcher) doQuery(queryURL string) (QueryResponse, error) {
+func (ss sentinelSearcher) doQuery(queryURL string) (QueryResponse, error) {
 
 	var qr QueryResponse
 
