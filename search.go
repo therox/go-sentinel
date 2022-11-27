@@ -3,7 +3,7 @@ package sentinel
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -103,7 +103,7 @@ func (ss sentinelSearcher) doQuery(queryURL string) (QueryResponse, error) {
 	}
 	req.Header.Add("Content-Type", "application/json")
 	defer resp.Body.Close()
-	bs, err := ioutil.ReadAll(resp.Body)
+	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return qr, err
 	}
@@ -128,7 +128,7 @@ func (ss sentinelSearcher) doQuery(queryURL string) (QueryResponse, error) {
 			if err != nil {
 				return qr, err
 			}
-			bs, err := ioutil.ReadAll(resp.Body)
+			bs, err := io.ReadAll(resp.Body)
 			if err != nil {
 				resp.Body.Close()
 				return qr, err
