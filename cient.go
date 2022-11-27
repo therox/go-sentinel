@@ -34,13 +34,18 @@ func NewSentinelSearcher(user string, password string) ISentinelSearcher {
 }
 
 // func NewClient(user string, password string, httpTimeout time.Duration) *SentinelClient {
-func NewClient(searcher ISentinelSearcher, engine dlEngine) *SentinelClient {
-
+func NewClient(searcher ISentinelSearcher, engine dlEngine) (*SentinelClient, error) {
+	if searcher == nil {
+		return nil, fmt.Errorf("searcher is nil")
+	}
+	if engine == nil {
+		return nil, fmt.Errorf("engine is nil")
+	}
 	sc := &SentinelClient{
 		Searcher: searcher,
 		dlEngine: engine,
 	}
-	return sc
+	return sc, nil
 }
 
 func (c *SentinelClient) Download(id string, dst string) (string, error) {

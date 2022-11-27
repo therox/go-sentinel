@@ -22,7 +22,10 @@ func main() {
 
 	dlEngine := sentinel_engine.NewSentinelEngine(credentials[0], credentials[1], 60*time.Minute)
 
-	client := sentinel.NewClient(searcher, dlEngine)
+	client, err := sentinel.NewClient(searcher, dlEngine)
+	if err != nil {
+		log.Fatalf("Error creating client: %v", err)
+	}
 
 	// Construct OpenAPI Search parameters
 	tiles := []string{"36UYA"}

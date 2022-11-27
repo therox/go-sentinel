@@ -25,8 +25,12 @@ func (m mockDlEngine) IsOnline(productID string) (bool, error) {
 	return m.isOnline, nil
 }
 func TestNewClient(t *testing.T) {
-	client := NewClient(mockSentinelSearcher{}, mockDlEngine{})
-	if client == nil {
-		t.Error("client is nil but should not be")
+	_, err := NewClient(mockSentinelSearcher{}, mockDlEngine{})
+	if err != nil {
+		t.Errorf("error should be nil, but is %s", err)
+	}
+	_, err = NewClient(nil, nil)
+	if err == nil {
+		t.Errorf("err is nil %s but should not be", err)
 	}
 }
