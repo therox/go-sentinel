@@ -38,7 +38,7 @@ func main() {
 			EndDate:      &et,
 		}
 
-		res, err := client.Query(searchParameters)
+		res, err := client.Searcher.Query(searchParameters)
 		if err != nil {
 			log.Fatal(err)
 		}

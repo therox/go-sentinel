@@ -9,23 +9,33 @@ import (
 )
 
 type SentinelClient struct {
+	Searcher SentinelSearcher
+	dlEngine dlEngine
+}
+
+type SentinelSearcher interface {
+	Query(params SearchParameters) (QueryResponse, error)
+}
+
+type sentinelSearcher struct {
 	user       string
 	password   string
 	httpClient *http.Client
 	searchURL  string
 	rows       int
-	dlEngine   dlEngine
 }
 
 func NewClient(user string, password string, httpTimeout time.Duration) *SentinelClient {
 
 	sc := &SentinelClient{
-		user:       user,
-		password:   password,
-		httpClient: &http.Client{},
-		searchURL:  "https://scihub.copernicus.eu/dhus/search?q=",
-		// searchURL: "https://apihub.copernicus.eu/apihub/search?q=",
-		rows:     100,
+		Searcher: &sentinelSearcher{
+			user:       user,
+			password:   password,
+			httpClient: &http.Client{},
+			searchURL:  "https://scihub.copernicus.eu/dhus/search?q=",
+			// searchURL: "https://apihub.copernicus.eu/apihub/search?q=",
+			rows: 100,
+		},
 		dlEngine: sentinel_engine.NewSentinelEngine(user, password, httpTimeout),
 	}
 	return sc

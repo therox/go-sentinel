@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) {
+func (ss *sentinelSearcher) Query(params SearchParameters) (QueryResponse, error) {
 
 	urlParams := ""
 
@@ -82,12 +82,12 @@ func (sc *SentinelClient) Query(params SearchParameters) (QueryResponse, error) 
 	urlParams += strings.Join(paramList, " AND ")
 
 	urlParams = url.QueryEscape(urlParams)
-	urlParams += fmt.Sprintf("&format=json&rows=%d", sc.rows)
+	urlParams += fmt.Sprintf("&format=json&rows=%d", ss.rows)
 
-	return sc.doQuery(fmt.Sprintf("%s%s", sc.searchURL, urlParams))
+	return ss.doQuery(fmt.Sprintf("%s%s", ss.searchURL, urlParams))
 }
 
-func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
+func (ss *sentinelSearcher) doQuery(queryURL string) (QueryResponse, error) {
 
 	var qr QueryResponse
 
@@ -96,8 +96,8 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 	if err != nil {
 		return qr, err
 	}
-	req.SetBasicAuth(sc.user, sc.password)
-	resp, err := sc.httpClient.Do(req)
+	req.SetBasicAuth(ss.user, ss.password)
+	resp, err := ss.httpClient.Do(req)
 	if err != nil {
 		return qr, err
 	}
@@ -112,7 +112,7 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 		return qr, err
 	}
 
-	offset := sc.rows
+	offset := ss.rows
 	for {
 		if len(qr.Feed.Entries) < qr.Feed.TotalResults {
 
@@ -122,9 +122,9 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 			if err != nil {
 				return qr, err
 			}
-			req.SetBasicAuth(sc.user, sc.password)
+			req.SetBasicAuth(ss.user, ss.password)
 			req.Header.Add("Content-Type", "application/json")
-			resp, err := sc.httpClient.Do(req)
+			resp, err := ss.httpClient.Do(req)
 			if err != nil {
 				return qr, err
 			}
@@ -147,7 +147,7 @@ func (sc *SentinelClient) doQuery(queryURL string) (QueryResponse, error) {
 			qr.Feed.Entries = append(qr.Feed.Entries, tempQR.Feed.Entries...)
 			resp.Body.Close()
 
-			offset += sc.rows
+			offset += ss.rows
 		} else {
 
 			break
