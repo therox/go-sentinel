@@ -109,6 +109,7 @@ func (se SentinelEngine) Download(productID string, dst string) (string, error) 
 		os.RemoveAll(filePath)
 		return filePath, fmt.Errorf(ErrIntegrityError{productID: productID}.Error())
 	}
+	fmt.Println("File downloaded to ", filePath)
 
 	return filePath, nil
 }
